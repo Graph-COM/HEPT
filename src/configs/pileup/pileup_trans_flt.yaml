@@ -1,0 +1,43 @@
+device: cuda:5
+note: "N/A"
+seed: 42
+log_tensorboard: false
+num_threads: 5
+
+
+model_name: trans_flt
+model_kwargs:
+  nb_features_inner: 10
+  nb_features: 150
+  pe_type: none
+  num_heads: 8
+  h_dim: 24
+  n_layers: 4
+  num_w_per_dist: 10
+
+
+loss_name: focal
+loss_kwargs:
+  dist_metric: l2_rbf
+  tau: 0.05
+
+
+optimizer_name: adam
+num_epochs: 200
+batch_size: 1
+optimizer_kwargs:
+  lr: 1.0e-3
+
+
+lr_scheduler_name: impatient
+lr_scheduler_metric: loss
+lr_scheduler_kwargs:
+  factor: 0.5
+  patience: 20
+  mode: "min"
+
+
+data_dir: ../data/
+dataset_name: pileup
+main_metric: auc
+mode: max

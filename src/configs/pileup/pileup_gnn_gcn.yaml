@@ -1,0 +1,39 @@
+device: cuda:7
+note: "N/A"
+seed: 42
+log_tensorboard: true
+num_threads: 5
+
+
+model_name: gnn_gcn
+model_kwargs:
+  hidden_dim: 70
+  out_dim: 1
+  num_layers: 4
+
+
+loss_name: focal
+loss_kwargs:
+  dist_metric: l2_rbf
+  tau: 0.05
+
+
+optimizer_name: adam
+num_epochs: 200
+batch_size: 1
+optimizer_kwargs:
+  lr: 1.0e-3
+
+
+lr_scheduler_name: impatient
+lr_scheduler_metric: loss
+lr_scheduler_kwargs:
+  factor: 0.5
+  patience: 20
+  mode: "min"
+
+
+data_dir: ../data/
+dataset_name: pileup
+main_metric: auc
+mode: max

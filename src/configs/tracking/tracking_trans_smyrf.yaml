@@ -1,0 +1,41 @@
+device: cuda:6
+note: "k60_rad256_smyrfTrans"
+seed: 42
+log_tensorboard: true
+num_threads: 5
+
+
+model_name: trans_smyrf
+model_kwargs:
+  bucket_size: 100
+  n_hashes: 3
+  pe_type: learned
+  num_heads: 8
+  h_dim: 24
+  n_layers: 4
+  num_w_per_dist: 10
+
+
+loss_name: infonce
+loss_kwargs:
+  dist_metric: l2_rbf
+  tau: 0.05
+
+
+optimizer_name: adam
+num_epochs: 2000
+batch_size: 1
+optimizer_kwargs:
+  lr: 1.0e-3
+
+
+lr_scheduler_name: step
+lr_scheduler_kwargs:
+  gamma: 0.5
+  step_size: 500
+
+
+data_dir: ../data/
+dataset_name: tracking-6k
+main_metric: accuracy@0.9
+mode: max
