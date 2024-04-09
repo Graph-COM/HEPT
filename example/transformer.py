@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch_geometric.nn import MLP
-from hept import HEPTAttention
+from .hept import HEPTAttention
 from torch.nn import functional as F
 from torch.utils.checkpoint import checkpoint
 from einops import rearrange
@@ -272,6 +272,15 @@ class Attn(nn.Module):
 
         # +2 for data.pos
         self.attn = HEPTAttention(self.dim_per_head + coords_dim, **kwargs)
+
+        self.dropout = nn.Dropout(0.1)
+        self.norm1 = nn.LayerNorm(self.dim_per_head)
+        self.norm2 = nn.LayerNorm(self.dim_per_head)
+        self.ff = nn.Sequential(
+            nn.Linear(self.dim_per_head, self.dim_per_head),
+            nn.ReLU(),
+            nn.Linear(self.dim_per_head, self.dim_per_head),
+        )
 
         # eta/phi from data.pos use the same weights as they are used to calc dR
         self.w_rpe = nn.Linear(kwargs["num_w_per_dist"] * (coords_dim - 1), self.num_heads * self.dim_per_head)
