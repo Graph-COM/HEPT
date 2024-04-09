@@ -27,7 +27,7 @@ def get_model(model_name, model_kwargs, dataset, test_N=10000, test_k=100):
     model.model_name = model_name
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Number of parameters: {num_params}")
-    count_flops_and_params(model, dataset, test_N, test_k)
+    # count_flops_and_params(model, dataset, test_N, test_k)
     return model
 
 

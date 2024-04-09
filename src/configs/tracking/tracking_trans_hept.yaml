@@ -1,4 +1,4 @@
-device: cuda:6
+device: cuda:0
 note: k60_rad256_hept
 seed: 42
 log_tensorboard: false
@@ -38,6 +38,6 @@ lr_scheduler_kwargs:
 
 data_dir: ../data/
 dataset_name: tracking-6k
-# dataset_name: tracking-60k
+#dataset_name: tracking-60k
 main_metric: accuracy@0.9
 mode: max
