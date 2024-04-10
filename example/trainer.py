@@ -1,19 +1,26 @@
 from tqdm import tqdm
-from pathlib import Path
-from copy import deepcopy
-from datetime import datetime
-
-import numpy as np
 import torch
 from torchmetrics import MeanMetric
-from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau, LambdaLR, StepLR
 from torch_geometric.utils import unbatch, remove_self_loops, to_undirected, subgraph
 
-from utils import set_seed, get_optimizer, log, get_lr_scheduler, add_random_edge, get_loss
-from utils.get_data import get_data_loader, get_dataset
-from utils.get_model import get_model
 from utils.metrics import acc_and_pr_at_k, point_filter
+
+
+def get_new_idx_split(dataset):
+    sorted_evtid = dataset.evtid.argsort()
+    dataset_len = len(dataset)
+
+    split = {"train": 0.8, "valid": 0.1, "test": 0.1}
+    n_train = int(dataset_len * split["train"])
+    n_train = n_train - n_train % 10
+    n_valid = int(dataset_len * split["valid"])
+
+    idx = sorted_evtid
+    train_idx = idx[:n_train]
+    valid_idx = idx[n_train : n_train + n_valid]
+    test_idx = idx[n_train + n_valid :]
+    return {"train": train_idx, "valid": valid_idx, "test": test_idx}
 
 
 def train_one_batch(model, optimizer, criterion, data, lr_s):
@@ -51,8 +58,7 @@ def process_data(data, phase, device, epoch, p=0.2):
 def run_one_epoch(model, optimizer, criterion, data_loader, phase, epoch, device, metrics, lr_s):
     run_one_batch = train_one_batch if phase == "train" else eval_one_batch
     phase = "test " if phase == "test" else phase
-
-    pbar = tqdm(data_loader, disable=__name__ != "__main__")
+    pbar = tqdm(data_loader)
     for idx, data in enumerate(pbar):
         if phase == "train" and model.attn_type == "None":
             torch.cuda.empty_cache()

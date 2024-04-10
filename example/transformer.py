@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torch_geometric.nn import MLP
-from .hept import HEPTAttention
+from hept import HEPTAttention
 from torch.nn import functional as F
 from torch.utils.checkpoint import checkpoint
 from einops import rearrange
