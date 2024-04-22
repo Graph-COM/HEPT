@@ -15,6 +15,7 @@ new_test/
 # Distribution / packaging
 .Python
 *.pt
+!tracking-60k-model.pt
 build/
 develop-eggs/
 nni-experiments/

@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 def train_one_batch(model, optimizer, criterion, data, lr_s):
     model.train()
-    embeddings = model(data)
+    embeddings = model(data.x, data.coords, data.batch)
     loss = criterion(embeddings, data.point_pairs_index, data.particle_id, data.reconstructable, data.pt)
 
     optimizer.zero_grad()
@@ -25,19 +25,9 @@ def train_one_batch(model, optimizer, criterion, data, lr_s):
 @torch.no_grad()
 def eval_one_batch(model, optimizer, criterion, data, lr_s):
     model.eval()
-    embeddings = model(data)
+    embeddings = model(data.x, data.coords, data.batch)
     loss = criterion(embeddings, data.point_pairs_index, data.particle_id, data.reconstructable, data.pt)
     return loss.item(), embeddings.detach(), data.particle_id.detach()
-
-
-def process_data(data, phase, device, epoch, p=0.2):
-    data = data.to(device)
-    if phase == "train":
-        # pairs_to_add = add_random_edge(data.point_pairs_index, p=p, batch=data.batch, force_undirected=True)
-        num_aug_pairs = int(data.point_pairs_index.size(1) * p / 2)
-        pairs_to_add = to_undirected(torch.randint(0, data.num_nodes, (2, num_aug_pairs), device=device))
-        data.point_pairs_index = torch.cat([data.point_pairs_index, pairs_to_add], dim=1)
-    return data
 
 
 def run_one_epoch(model, optimizer, criterion, data_loader, phase, epoch, device, metrics, lr_s):
@@ -45,10 +35,7 @@ def run_one_epoch(model, optimizer, criterion, data_loader, phase, epoch, device
     phase = "test " if phase == "test" else phase
     pbar = tqdm(data_loader)
     for idx, data in enumerate(pbar):
-        if phase == "train" and model.attn_type == "None":
-            torch.cuda.empty_cache()
-        data = process_data(data, phase, device, epoch)
-
+        data = data.to(device)
         batch_loss, batch_embeddings, batch_cluster_ids = run_one_batch(model, optimizer, criterion, data, lr_s)
         batch_acc = update_metrics(metrics, data, batch_embeddings, batch_cluster_ids, criterion.dist_metric)
         metrics["loss"].update(batch_loss)
