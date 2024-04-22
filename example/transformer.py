@@ -1,9 +1,16 @@
+import math
 import torch
 from torch import nn
 from torch_geometric.nn import MLP
 from hept import HEPTAttention
 from einops import rearrange
 from hept_utils import quantile_partition, get_regions, pad_to_multiple
+
+
+def bit_shift(base, shift_idx):
+    max_base = base.max()
+    num_bits = math.ceil(math.log2(max_base + 1))
+    return (shift_idx << num_bits) | base
 
 
 def prepare_input(x, coords, batch, helper_params):
@@ -14,7 +21,7 @@ def prepare_input(x, coords, batch, helper_params):
     kwargs["coords"] = coords
 
     with torch.no_grad():
-        block_size = helper_params["block_size"]
+        block_size, num_heads = helper_params["block_size"], helper_params["num_heads"]
         kwargs["raw_size"] = x.shape[0]
         x = pad_to_multiple(x, block_size, dims=0)
         kwargs["coords"] = pad_to_multiple(kwargs["coords"], block_size, dims=0, value=float("inf"))
@@ -27,6 +34,11 @@ def prepare_input(x, coords, batch, helper_params):
         kwargs["region_indices"] = [region_indices_eta, region_indices_phi]
         kwargs["regions_h"] = regions_h
         kwargs["coords"][kwargs["raw_size"] :] = 0.0
+
+        combined_shifts = bit_shift(region_indices_eta.long(), region_indices_phi.long())
+        paded_batch = pad_to_multiple(batch, block_size, dims=0, value=batch.max() + 1)
+        combined_shifts = bit_shift(combined_shifts, paded_batch[None])
+        kwargs["combined_shifts"] = rearrange(combined_shifts, "(c h) n -> c h n", h=num_heads)
     return x, mask, kwargs
 
 
@@ -65,6 +77,7 @@ class Transformer(nn.Module):
         self.helper_params["block_size"] = kwargs["block_size"]
         self.regions = nn.Parameter(get_regions(kwargs["num_regions"], kwargs["n_hashes"], kwargs["num_heads"]), requires_grad=False)
         self.helper_params["regions"] = self.regions
+        self.helper_params["num_heads"] = kwargs["num_heads"]
 
         if self.num_classes:
             self.out_proj = nn.Linear(int(self.h_dim // 2), num_classes)

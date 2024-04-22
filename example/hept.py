@@ -80,10 +80,13 @@ class HEPTAttention(nn.Module):
         q_hashed[..., kwargs["raw_size"] :] = float("inf")
         k_hashed[..., kwargs["raw_size"] :] = float("inf")
 
-        q_shifts, k_shifts = get_geo_shift(kwargs["regions_h"], hash_shift, kwargs["region_indices"], self.n_hashes)
+        # q_shifts, k_shifts = get_geo_shift(kwargs["regions_h"], hash_shift, kwargs["region_indices"], self.n_hashes)
+        # q_hashed = q_hashed + q_shifts
+        # k_hashed = k_hashed + k_shifts
 
-        q_hashed = q_hashed + q_shifts
-        k_hashed = k_hashed + k_shifts
+        combined_shifts = kwargs["combined_shifts"] * hash_shift
+        q_hashed = q_hashed + combined_shifts
+        k_hashed = k_hashed + combined_shifts
 
         q_positions = q_hashed.argsort(dim=-1)
         k_positions = k_hashed.argsort(dim=-1)
