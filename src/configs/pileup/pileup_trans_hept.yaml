@@ -9,7 +9,7 @@ model_name: trans_hept
 model_kwargs:
   block_size: 100
   n_hashes: 3
-  num_buckets: 140
+  num_regions: 140
   pe_type: none
   num_heads: 8
   h_dim: 24

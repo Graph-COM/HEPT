@@ -35,6 +35,22 @@ class TrackingTransform(BaseTransform):
         return data
 
 
+def get_new_idx_split(dataset):
+    sorted_evtid = dataset.evtid.argsort()
+    dataset_len = len(dataset)
+
+    split = {"train": 0.8, "valid": 0.1, "test": 0.1}
+    n_train = int(dataset_len * split["train"])
+    n_train = n_train - n_train % 10
+    n_valid = int(dataset_len * split["valid"])
+
+    idx = sorted_evtid
+    train_idx = idx[:n_train]
+    valid_idx = idx[n_train : n_train + n_valid]
+    test_idx = idx[n_train + n_valid :]
+    return {"train": train_idx, "valid": valid_idx, "test": test_idx}
+
+
 class Tracking(InMemoryDataset):
     def __init__(self, root, dataset_name, debug=False, **kwargs):
         assert dataset_name in ["tracking-6k", "tracking-60k"]
@@ -67,6 +83,7 @@ class Tracking(InMemoryDataset):
 
         super(Tracking, self).__init__(root, transform=kwargs.get("transform", None), pre_transform=None)
         self.data, self.slices, self.idx_split = torch.load(self.processed_paths[0])
+        self.idx_split = get_new_idx_split(self)
         self.x_dim = self._data.x.shape[1] + 1
         self.coords_dim = 2 + 4
 

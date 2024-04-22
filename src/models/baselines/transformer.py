@@ -12,7 +12,7 @@ from ..attention import (
     FlatformerAttention,
 )
 from ..model_utils.mask_utils import FullMask
-from ..model_utils.hash_utils import pad_to_multiple, get_bins, quantile_binning
+from ..model_utils.hash_utils import pad_to_multiple, get_regions, quantile_partition
 from ..model_utils.window_utils import discretize_coords, FlattenedWindowMapping, get_pe_func
 from torch_geometric.utils import to_dense_batch
 from torch.utils.checkpoint import checkpoint
@@ -48,13 +48,13 @@ def prepare_input(x, coords, edge_index, batch, attn_type, helper_funcs):
             kwargs["coords"] = pad_to_multiple(kwargs["coords"], block_size, dims=0, value=float("inf"))
             sorted_eta_idx = torch.argsort(kwargs["coords"][..., 0], dim=-1)
             sorted_phi_idx = torch.argsort(kwargs["coords"][..., 1], dim=-1)
-            bins = helper_funcs["bins"]
-            bins_h = rearrange(bins, "c a h -> a (c h)")
-            bin_indices_eta = quantile_binning(sorted_eta_idx, bins_h[0][:, None])
-            bin_indices_phi = quantile_binning(sorted_phi_idx, bins_h[1][:, None])
-            kwargs["bin_indices"] = [bin_indices_eta, bin_indices_phi]
-            kwargs["bins_h"] = bins_h
-            kwargs["coords"][kwargs["raw_size"]:] = 0.0
+            regions = helper_funcs["regions"]
+            regions_h = rearrange(regions, "c a h -> a (c h)")
+            region_indices_eta = quantile_partition(sorted_eta_idx, regions_h[0][:, None])
+            region_indices_phi = quantile_partition(sorted_phi_idx, regions_h[1][:, None])
+            kwargs["region_indices"] = [region_indices_eta, region_indices_phi]
+            kwargs["regions_h"] = regions_h
+            kwargs["coords"][kwargs["raw_size"] :] = 0.0
 
     if attn_type in ["smyrf"] and "rpe" in helper_funcs["pe_type"]:
         rpe_ones_shape = (*x.shape[:-1], helper_funcs["num_heads"], 1)
@@ -106,8 +106,8 @@ class Transformer(nn.Module):
             self.W = nn.Linear(self.h_dim * (self.n_layers * 4 + 1), int(self.h_dim // 2), bias=False)
         elif self.attn_type == "hept":
             self.helper_funcs["block_size"] = kwargs["block_size"]
-            self.bins = nn.Parameter(get_bins(kwargs["num_buckets"], kwargs["n_hashes"], kwargs["num_heads"]), requires_grad=False)
-            self.helper_funcs["bins"] = self.bins
+            self.regions = nn.Parameter(get_regions(kwargs["num_regions"], kwargs["n_hashes"], kwargs["num_heads"]), requires_grad=False)
+            self.helper_funcs["regions"] = self.regions
 
         elif self.attn_type == "smyrf":
             self.helper_funcs["num_heads"], self.helper_funcs["pe_type"] = kwargs["num_heads"], kwargs["pe_type"]
@@ -145,7 +145,7 @@ class Transformer(nn.Module):
         out = encoded_x + self.dropout(self.mlp_out(encoded_x))
 
         if kwargs.get("raw_size", False):
-            out = out[:kwargs["raw_size"]]
+            out = out[: kwargs["raw_size"]]
 
         if mask is not None:
             out = out[mask]

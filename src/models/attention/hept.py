@@ -3,7 +3,7 @@ import torch.nn as nn
 from typing import List
 
 from einops import rearrange
-from ..model_utils.hash_utils import lsh_clustering, batched_index_select, invert_permutation, E2LSH
+from ..model_utils.hash_utils import lsh_mapping, batched_index_select, invert_permutation, E2LSH
 
 
 def sort_to_buckets(x, perm, bucketsz):
@@ -44,16 +44,16 @@ def prep_qk(query, key, w, coords):
 
 
 @torch.no_grad()
-def get_geo_shift(bins_h: List[List[int]], hash_shift, bin_indices):
-    bin_indices_eta, bin_indices_phi = bin_indices
+def get_geo_shift(regions_h: List[List[int]], hash_shift, region_indices, num_or_hashes):
+    region_indices_eta, region_indices_phi = region_indices
 
-    q_hash_shift_eta = bin_indices_eta * hash_shift
-    k_hash_shift_eta = bin_indices_eta * hash_shift
+    q_hash_shift_eta = region_indices_eta * hash_shift
+    k_hash_shift_eta = region_indices_eta * hash_shift
 
-    q_hash_shift_phi = bin_indices_phi * hash_shift * (torch.ceil(bins_h[0][:, None]) + 1)
-    k_hash_shift_phi = bin_indices_phi * hash_shift * (torch.ceil(bins_h[0][:, None]) + 1)
+    q_hash_shift_phi = region_indices_phi * hash_shift * (torch.ceil(regions_h[0][:, None]) + 1)
+    k_hash_shift_phi = region_indices_phi * hash_shift * (torch.ceil(regions_h[0][:, None]) + 1)
     res = torch.stack([q_hash_shift_phi + q_hash_shift_eta, k_hash_shift_phi + k_hash_shift_eta], dim=0)
-    return rearrange(res, "a (c h) n -> a c h n", c=3)
+    return rearrange(res, "a (c h) n -> a c h n", c=num_or_hashes)
 
 
 class HEPTAttention(nn.Module):
@@ -90,11 +90,11 @@ class HEPTAttention(nn.Module):
         k_hat[:, kwargs["raw_size"] :] = 0.0
         value[:, kwargs["raw_size"] :] = 0.0
 
-        q_hashed, k_hashed, hash_shift = lsh_clustering(self.e2lsh, q_hat, k_hat, self.block_size, r=1)
-        q_hashed[..., kwargs["raw_size"]:] = float("inf")
-        k_hashed[..., kwargs["raw_size"]:] = float("inf")
+        q_hashed, k_hashed, hash_shift = lsh_mapping(self.e2lsh, q_hat, k_hat)
+        q_hashed[..., kwargs["raw_size"] :] = float("inf")
+        k_hashed[..., kwargs["raw_size"] :] = float("inf")
 
-        q_shifts, k_shifts = get_geo_shift(kwargs["bins_h"], hash_shift, kwargs["bin_indices"])
+        q_shifts, k_shifts = get_geo_shift(kwargs["regions_h"], hash_shift, kwargs["region_indices"], self.n_hashes)
 
         q_hashed = q_hashed + q_shifts
         k_hashed = k_hashed + k_shifts

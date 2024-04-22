@@ -109,22 +109,6 @@ def update_metrics(metrics, data, batch_embeddings, batch_cluster_ids, dist_metr
     return acc_09
 
 
-def get_new_idx_split(dataset):
-    sorted_evtid = dataset.evtid.argsort()
-    dataset_len = len(dataset)
-
-    split = {"train": 0.8, "valid": 0.1, "test": 0.1}
-    n_train = int(dataset_len * split["train"])
-    n_train = n_train - n_train % 10
-    n_valid = int(dataset_len * split["valid"])
-
-    idx = sorted_evtid
-    train_idx = idx[:n_train]
-    valid_idx = idx[n_train : n_train + n_valid]
-    test_idx = idx[n_train + n_valid :]
-    return {"train": train_idx, "valid": valid_idx, "test": test_idx}
-
-
 def run_one_seed(config):
     device = torch.device(config["device"] if torch.cuda.is_available() else "cpu")
     torch.set_num_threads(config["num_threads"])
@@ -143,7 +127,6 @@ def run_one_seed(config):
 
     set_seed(config["seed"])
     dataset = get_dataset(dataset_name, dataset_dir)
-    dataset.idx_split = get_new_idx_split(dataset)
     loaders = get_data_loader(dataset, dataset.idx_split, batch_size=config["batch_size"])
 
     model = get_model(model_name, config["model_kwargs"], dataset)
