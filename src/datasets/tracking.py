@@ -81,7 +81,7 @@ class Tracking(InMemoryDataset):
             [1000.0, np.pi, 1000.0, 1, 1 / 1000.0, 1 / 1000.0] + [1.0] * (len(self.feature_names) - 6)
         )
 
-        super(Tracking, self).__init__(root, transform=kwargs.get("transform", None), pre_transform=None)
+        super(Tracking, self).__init__(str(root), transform=kwargs.get("transform", None), pre_transform=None)
         self.data, self.slices, self.idx_split = torch.load(self.processed_paths[0])
         self.idx_split = get_new_idx_split(self)
         self.x_dim = self._data.x.shape[1] + 1
@@ -89,11 +89,11 @@ class Tracking(InMemoryDataset):
 
     @property
     def raw_dir(self):
-        return self.root / "raw" / f"{self.dataset_name}"
+        return os.path.join(self.root, "raw", self.dataset_name)
 
     @property
     def processed_dir(self):
-        return self.root / "processed" / f"{self.dataset_name}"
+        return os.path.join(self.root, "processed", self.dataset_name)
 
     @property
     def raw_file_names(self):

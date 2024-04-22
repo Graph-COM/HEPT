@@ -8,7 +8,6 @@ from hept_utils import quantile_partition, get_regions, pad_to_multiple
 
 def prepare_input(x, coords, batch, helper_params):
     kwargs = {}
-    assert batch.max() == 0
     key_padding_mask = None
     mask = None
     kwargs["key_padding_mask"] = key_padding_mask
@@ -32,11 +31,11 @@ def prepare_input(x, coords, batch, helper_params):
 
 
 class Transformer(nn.Module):
-    def __init__(self, in_dim, coords_dim, task, dropout=0.1, **kwargs):
+    def __init__(self, in_dim, coords_dim, num_classes, dropout=0.1, **kwargs):
         super().__init__()
         self.n_layers = kwargs["n_layers"]
         self.h_dim = kwargs["h_dim"]
-        self.task = task
+        self.num_classes = num_classes
 
         self.feat_encoder = nn.Sequential(
             nn.Linear(in_dim, self.h_dim),
@@ -67,8 +66,8 @@ class Transformer(nn.Module):
         self.regions = nn.Parameter(get_regions(kwargs["num_regions"], kwargs["n_hashes"], kwargs["num_heads"]), requires_grad=False)
         self.helper_params["regions"] = self.regions
 
-        # if classification
-        # self.out_proj = nn.Linear(int(self.h_dim // 2), num_classes)
+        if self.num_classes:
+            self.out_proj = nn.Linear(int(self.h_dim // 2), num_classes)
 
     def forward(self, x, coords, batch):
         x, mask, kwargs = prepare_input(x, coords, batch, self.helper_params)
@@ -88,8 +87,8 @@ class Transformer(nn.Module):
         if mask is not None:
             out = out[mask]
 
-        # if classification
-        # out = self.out_proj(out)
+        if self.num_classes:
+            out = self.out_proj(out)
         return out
 
 

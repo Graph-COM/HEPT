@@ -99,10 +99,12 @@ def unsort_from_buckets(s_x, perm_inverse):
 
 
 def pad_to_multiple(tensor, multiple, dims=-1, value=0):
-    try:
-        dims = list(dims)  # If dims is an iterable (e.g., List, Tuple)
-    except:
-        dims = [dims]
+    # try:
+    #     dims = list(dims)  # If dims is an iterable (e.g., List, Tuple)
+    # except:
+    #     dims = [dims]
+    assert isinstance(dims, int)
+    dims = [dims]
     # convert dims from negative to positive
     dims = [d if d >= 0 else tensor.ndim + d for d in dims]
     padding = [0] * (2 * tensor.ndim)
