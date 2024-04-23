@@ -7,6 +7,7 @@
 ## TODO
 - [ ] Put more details in the README.
 - [ ] Add support for FlashAttn.
+- [ ] Modify the example code to have the same naming convention as mentioned in the paper.
 - [x] Add support for efficient processing of batched input.
 - [x] Add an example of HEPT with minimal code.
 
@@ -47,6 +48,21 @@ Or
 python pileup_trainer.py -m hept
 ```
 Configurations will be loaded from those located in `./configs/` directory.
+
+## FAQ
+
+#### How to tune the hyperparameters of HEPT?
+There are three key hyperparameters in HEPT:
+- `block_size`: block size for attention computation
+- `n_hashes`: the number of hash tables, i.e., OR LSH
+-  `num_regions`: # of regions HEPT will randomly divide the input space into (Sec. 4.3 in the paper)
+
+We suggest first determine `block_size` and `n_hashes` according to the computational budget, but generally `n_hashes` should be greater than 1. `num_regions` should be tuned according to the local inductive bias of the dataset.
+
+
+
+
+
 
 ## Reference
 ```bibtex
