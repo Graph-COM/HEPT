@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
-from torch_geometric.utils import unbatch, to_undirected
+from torch_geometric.utils import unbatch
 from torchmetrics import MeanMetric
 import numpy as np
 from numba import jit

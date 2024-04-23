@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 from einops import rearrange
 
 
@@ -41,9 +40,7 @@ class E2LSH(nn.Module):
         super(E2LSH, self).__init__()
 
         self.alpha = nn.Parameter(torch.normal(0, 1, (n_heads, dim, n_hashes)))
-        self.beta = nn.Parameter(uniform(0, r, shape=(1, n_hashes)))
         self.alpha.requires_grad = False
-        self.beta.requires_grad = False
 
     def forward(self, vecs):
         projection = torch.bmm(vecs, self.alpha)
@@ -96,27 +93,3 @@ def sort_to_buckets(x, perm, bucketsz):
 def unsort_from_buckets(s_x, perm_inverse):
     b_x = rearrange(s_x, "h b nbuckets bucketsz d -> h b (nbuckets bucketsz) d")
     return batched_index_select(b_x, perm_inverse)
-
-
-def pad_to_multiple(tensor, multiple, dims=-1, value=0):
-    # try:
-    #     dims = list(dims)  # If dims is an iterable (e.g., List, Tuple)
-    # except:
-    #     dims = [dims]
-    assert isinstance(dims, int)
-    dims = [dims]
-    # convert dims from negative to positive
-    dims = [d if d >= 0 else tensor.ndim + d for d in dims]
-    padding = [0] * (2 * tensor.ndim)
-    for d in dims:
-        size = tensor.size(d)
-        # Pytorch's JIT doesn't like divmod
-        # m, remainder = divmod(size, multiple)
-        m = size // multiple
-        remainder = size - m * multiple
-        if remainder != 0:
-            padding[2 * (tensor.ndim - d - 1) + 1] = multiple - remainder
-    if all(p == 0 for p in padding):
-        return tensor
-    else:
-        return F.pad(tensor, tuple(padding), value=value)

@@ -23,27 +23,6 @@ def compute_edge_weight(data):
     return edge_weights
 
 
-def batched_point_distance(x, point_pairs, batch_size=1000):
-    """
-    Compute the L2 norm between points in x specified by point_pairs in batches.
-
-    :param x: Tensor of shape (n, d)
-    :param point_pairs: Tensor of shape (2, E)
-    :param batch_size: Size of the batch for processing
-    :return: Tensor of distances
-    """
-    num_pairs = point_pairs.size(1)
-    distances = []
-
-    for i in range(0, num_pairs, batch_size):
-        batch_pairs = point_pairs[:, i:i+batch_size]
-        diff = x[batch_pairs[0]] - x[batch_pairs[1]]
-        batch_distances = torch.linalg.norm(diff, ord=2, dim=-1)
-        distances.append(batch_distances)
-
-    return torch.cat(distances)
-
-
 def log(*args):
     print(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]', *args)
 
