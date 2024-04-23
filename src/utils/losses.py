@@ -21,8 +21,8 @@ class InfoNCELoss(nn.Module):
         if self.dist_metric == "cosine":
             similarity = F.cosine_similarity(x[point_pairs[0]], x[point_pairs[1]], dim=-1)
         elif self.dist_metric == "l2_rbf":
-            # l2_dist = torch.linalg.norm(x[point_pairs[0]] - x[point_pairs[1]], ord=2, dim=-1)
-            l2_dist = batched_point_distance(x, point_pairs, batch_size=5000)
+            l2_dist = torch.linalg.norm(x[point_pairs[0]] - x[point_pairs[1]], ord=2, dim=-1)
+            # l2_dist = batched_point_distance(x, point_pairs, batch_size=5000)
             sigma = 0.75
             similarity = torch.exp(-l2_dist / (2 * sigma**2))
         elif self.dist_metric == "l2_inverse":

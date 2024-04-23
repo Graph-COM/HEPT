@@ -330,7 +330,9 @@ class CrossPolytopeLSH(LSH):
 def lsh_mapping(e2lsh, queries, keys):
     queries_hashed = e2lsh(queries)
     keys_hashed = e2lsh(keys)
-    hash_shift = max(queries_hashed.max(), keys_hashed.max()) - min(queries_hashed.min(), keys_hashed.min())
+    max_hash_shift = torch.max(queries_hashed.max(-1, keepdim=True).values, keys_hashed.max(-1, keepdim=True).values)
+    min_hash_shift = torch.min(queries_hashed.min(-1, keepdim=True).values, keys_hashed.min(-1, keepdim=True).values)
+    hash_shift = max_hash_shift - min_hash_shift
     return queries_hashed, keys_hashed, hash_shift
 
 
