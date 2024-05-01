@@ -106,6 +106,12 @@ class Transformer(nn.Module):
             self.out_proj = nn.Linear(int(self.h_dim // 2), num_classes)
 
     def forward(self, x, coords, batch):
+        """
+        Args:
+            x: Tensor of shape (N, in_dim), where N is the total number of points in the batch
+            coords: Tensor of shape (N, coords_dim), where for HEP tasks the first two dimensions of coords are expected to be eta and phi
+            batch: Tensor of shape (N,)
+        """
         x, kwargs, unpad_seq = prepare_input(x, coords, batch, self.helper_params)
 
         encoded_x = self.feat_encoder(x)

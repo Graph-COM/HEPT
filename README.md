@@ -12,7 +12,10 @@
 - [x] Add an example of HEPT with minimal code.
 
 ## News
-- **2024.04:** HEPT now supports efficient processing of batched input by this [commit](https://github.com/Graph-COM/HEPT/commit/2e408388a16400050c0eb4c4f7390c3c24078dee). This is implemented via integrating batch indices in the computation of AND hash codes, which is more efficient than naive padding, especially for batches with imbalanced point cloud sizes. **Note:** The current implementation for batched input is not yet fully tested. Please feel free to open an issue if you encounter any problems.
+- **2024.04:** HEPT now supports efficient processing of batched input by this [commit](https://github.com/Graph-COM/HEPT/commit/2e408388a16400050c0eb4c4f7390c3c24078dee). This is implemented via integrating batch indices in the computation of AND hash codes, which is more efficient than naive padding, especially for batches with imbalanced point cloud sizes. **Note:**
+  - Only the code in `./example` is updated to support batched input.
+  - The original implementation in `./src` is not updated.
+  - The current implementation for batched input is not yet fully tested. Please feel free to open an issue if you encounter any problems.
 
 - **2024.04:** An example of HEPT with minimal code is added in `./example` by this [commit](https://github.com/Graph-COM/HEPT/commit/350a9863d7757e556177c52a44bac2aaf0c6dde8). It's a good starting point for users who want to use HEPT in their own projects. There are minor differences between the example and the original implementation in `./src/models/attention/hept.py`, but they should not affect the performance of the model.
 
