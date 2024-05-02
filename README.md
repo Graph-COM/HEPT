@@ -2,6 +2,7 @@
 <p align="center">
     <a href="https://arxiv.org/abs/2402.12535"><img src="https://img.shields.io/badge/-arXiv-grey?logo=gitbook&logoColor=white" alt="Paper"></a>
     <a href="https://github.com/Graph-COM/HEPT"><img src="https://img.shields.io/badge/-Github-grey?logo=github" alt="Github"></a>
+    <a href="https://arxiv.org/abs/2402.12535"> <img alt="License" src="https://img.shields.io/static/v1?label=Pub&message=ICML%2724&color=blue"></a>
 </p>
 
 ## TODO
@@ -13,8 +14,7 @@
 
 ## News
 - **2024.04:** HEPT now supports efficient processing of batched input by this [commit](https://github.com/Graph-COM/HEPT/commit/2e408388a16400050c0eb4c4f7390c3c24078dee). This is implemented via integrating batch indices in the computation of AND hash codes, which is more efficient than naive padding, especially for batches with imbalanced point cloud sizes. **Note:**
-  - Only the code in `./example` is updated to support batched input.
-  - The original implementation in `./src` is not updated.
+  - Only the code in `./example` is updated to support batched input, and the original implementation in `./src` is not updated.
   - The current implementation for batched input is not yet fully tested. Please feel free to open an issue if you encounter any problems.
 
 - **2024.04:** An example of HEPT with minimal code is added in `./example` by this [commit](https://github.com/Graph-COM/HEPT/commit/350a9863d7757e556177c52a44bac2aaf0c6dde8). It's a good starting point for users who want to use HEPT in their own projects. There are minor differences between the example and the original implementation in `./src/models/attention/hept.py`, but they should not affect the performance of the model.
