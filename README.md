@@ -12,7 +12,7 @@
 - [x] Add an example of HEPT with minimal code.
 
 ## News
-- **2024.06:** HEPT has been accepted to ICML 2024 and is selected as an oral presentation (144/9,473, 1.5% acceptance rate)!
+- **2024.06:** HEPT has been accepted to ICML 2024 and is selected as an oral presentation (144/9473, 1.5% acceptance rate)!
 - **2024.04:** HEPT now supports efficient processing of batched input by this [commit](https://github.com/Graph-COM/HEPT/commit/2e408388a16400050c0eb4c4f7390c3c24078dee). This is implemented via integrating batch indices in the computation of AND hash codes, which is more efficient than naive padding, especially for batches with imbalanced point cloud sizes. **Note:**
   - Only the code in `./example` is updated to support batched input, and the original implementation in `./src` is not updated.
   - The current implementation for batched input is not yet fully tested. Please feel free to open an issue if you encounter any problems.
