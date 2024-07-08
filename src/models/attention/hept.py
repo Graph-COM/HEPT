@@ -91,6 +91,7 @@ class HEPTAttention(nn.Module):
         value[:, kwargs["raw_size"] :] = 0.0
 
         q_hashed, k_hashed, hash_shift = lsh_mapping(self.e2lsh, q_hat, k_hat)
+        hash_shift = rearrange(hash_shift, "c h d -> (c h) d")
         q_hashed[..., kwargs["raw_size"] :] = float("inf")
         k_hashed[..., kwargs["raw_size"] :] = float("inf")
 
