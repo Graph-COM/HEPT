@@ -8,7 +8,6 @@
 ## TODO
 - [ ] Put more details in the README.
 - [ ] Add support for FlashAttn.
-- [ ] Modify the example code to have the same naming convention as mentioned in the paper.
 - [x] Add support for efficient processing of batched input.
 - [x] Add an example of HEPT with minimal code.
 
@@ -38,7 +37,12 @@ python tracking.py -d tracking-60k
 ## Installation
 
 #### Environment
-We are using `torch 2.0.1` and `pyg 2.4.0` with `python 3.10.0` and `cuda 11.8`.
+We are using `torch 2.3.1` and `pyg 2.5.3` with `python 3.10.14` and `cuda 12.1`. Use the following command to install the required packages:
+```
+conda env create -f environment.yml
+pip install torch_geometric==2.5.3
+pip install torch_scatter==2.1.2 torch_cluster==1.6.3 -f https://data.pyg.org/whl/torch-2.3.0+cu121.html
+```
 
 #### Running the code
 To run the code, you can use the following command:
@@ -69,9 +73,9 @@ We suggest first determine `block_size` and `n_hashes` according to the computat
 
 ## Reference
 ```bibtex
-@article{miao2024hept,
+@article{miao2024locality,
   title   = {Locality-Sensitive Hashing-Based Efficient Point Transformer with Applications in High-Energy Physics},
   author  = {Miao, Siqi and Lu, Zhiyuan and Liu, Mia and Duarte, Javier and Li, Pan},
-  journal = {arXiv preprint arXiv:2402.12535},
+  journal = {International Conference on Machine Learning},
   year    = {2024}
 }
